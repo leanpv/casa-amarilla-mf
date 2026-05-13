@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 280">
+  <defs>
+    <linearGradient id="ml-body" x1="50%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" stop-color="#f8c840"/>
+      <stop offset="30%" stop-color="#e09818"/>
+      <stop offset="75%" stop-color="#b06010"/>
+      <stop offset="100%" stop-color="#7a3c08"/>
+    </linearGradient>
+    <linearGradient id="ml-inner" x1="50%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" stop-color="#d08818"/>
+      <stop offset="100%" stop-color="#6a3408"/>
+    </linearGradient>
+    <clipPath id="ml-clip">
+      <path d="M 68 208 C 68 58, 432 58, 432 208 C 432 158, 68 158, 68 208 Z"/>
+    </clipPath>
+  </defs>
+
+  <!-- Ground shadow -->
+  <ellipse cx="250" cy="224" rx="185" ry="13" fill="rgba(0,0,0,0.28)"/>
+
+  <!-- Main crescent body -->
+  <path d="M 68 208 C 68 58, 432 58, 432 208 C 432 158, 68 158, 68 208 Z" fill="url(#ml-body)"/>
+
+  <!-- Inner face (concave underside) — slightly lighter -->
+  <path d="M 68 208 C 68 158, 432 158, 432 208 Z" fill="url(#ml-inner)"/>
+
+  <!-- Pastry layer lines clipped to body -->
+  <g clip-path="url(#ml-clip)" stroke="#c07808" stroke-width="3" opacity="0.35">
+    <line x1="100" y1="40" x2="100" y2="215"/>
+    <line x1="140" y1="40" x2="140" y2="215"/>
+    <line x1="180" y1="40" x2="180" y2="215"/>
+    <line x1="220" y1="40" x2="220" y2="215"/>
+    <line x1="260" y1="40" x2="260" y2="215"/>
+    <line x1="300" y1="40" x2="300" y2="215"/>
+    <line x1="340" y1="40" x2="340" y2="215"/>
+    <line x1="380" y1="40" x2="380" y2="215"/>
+    <line x1="420" y1="40" x2="420" y2="215"/>
+  </g>
+
+  <!-- Outer edge highlight -->
+  <path d="M 130 110 C 250 62, 370 110, 370 110"
+    stroke="rgba(255,255,255,0.22)" stroke-width="28" fill="none" stroke-linecap="round"/>
+
+  <!-- Small bright highlight at top peak -->
+  <ellipse cx="250" cy="74" rx="50" ry="14" fill="rgba(255,255,255,0.16)" transform="rotate(0 250 74)"/>
+
+  <!-- Tip details: end circles showing pastry cross-section -->
+  <ellipse cx="68" cy="192" rx="10" ry="16" fill="#c07010" transform="rotate(12 68 192)"/>
+  <ellipse cx="432" cy="192" rx="10" ry="16" fill="#c07010" transform="rotate(-12 432 192)"/>
+  <ellipse cx="68" cy="192" rx="5" ry="8" fill="#e09020" transform="rotate(12 68 192)"/>
+  <ellipse cx="432" cy="192" rx="5" ry="8" fill="#e09020" transform="rotate(-12 432 192)"/>
+</svg>
