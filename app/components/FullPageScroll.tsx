@@ -81,11 +81,24 @@ export default function FullPageScroll({ slides, backgrounds, navLinks }: Props)
       if (e.key === 'ArrowUp') navigate(-1);
     };
 
+    let touchStartY = 0;
+    const handleTouchStart = (e: TouchEvent) => {
+      touchStartY = e.touches[0].clientY;
+    };
+    const handleTouchEnd = (e: TouchEvent) => {
+      const delta = touchStartY - e.changedTouches[0].clientY;
+      if (Math.abs(delta) > 40) navigate(delta > 0 ? 1 : -1);
+    };
+
     window.addEventListener('wheel', handleWheel, { passive: false });
     window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('touchstart', handleTouchStart, { passive: true });
+    window.addEventListener('touchend', handleTouchEnd, { passive: true });
     return () => {
       window.removeEventListener('wheel', handleWheel);
       window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchend', handleTouchEnd);
     };
   }, [slides.length]);
 
@@ -134,7 +147,7 @@ export default function FullPageScroll({ slides, backgrounds, navLinks }: Props)
           src="/logoCA.png"
           alt="Casa Amarilla"
           onClick={() => navigateTo(0)}
-          style={{ height: '70px', cursor: 'pointer', userSelect: 'none' }}
+          style={{ height: 'clamp(40px, 8vw, 70px)', cursor: 'pointer', userSelect: 'none' }}
         />
 
         <div style={{ marginLeft: 'auto', display: 'flex', gap: '20px', alignItems: 'center' }}>
@@ -186,10 +199,10 @@ export default function FullPageScroll({ slides, backgrounds, navLinks }: Props)
                   background: active ? 'white' : 'rgba(255,255,255,0.18)',
                   color: active ? '#0a0a0a' : 'white',
                   border: 'none',
-                  padding: '10px 28px',
+                  padding: 'clamp(6px, 1.5vw, 10px) clamp(14px, 3vw, 28px)',
                   borderRadius: '999px',
                   fontWeight: 600,
-                  fontSize: '0.9rem',
+                  fontSize: 'clamp(0.75rem, 2vw, 0.9rem)',
                   cursor: 'pointer',
                   letterSpacing: '0.02em',
                   transition: 'background 0.3s ease, color 0.3s ease',
