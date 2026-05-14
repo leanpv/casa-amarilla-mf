@@ -20,10 +20,10 @@ export default function ProductSlide({ product, imageScale = 1 }: { product: Pro
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'center',
+        justifyContent: 'space-evenly',
         position: 'relative',
-        padding: '80px 24px 100px',
-        gap: '16px',
+        padding: '185px 24px 130px',
+        gap: '12px',
       }}>
         <div style={{ textAlign: 'center' }}>
           <h2 style={{
