@@ -15,6 +15,10 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Casa Amarilla",
   description: "Productos Argentinos. Hacé tu pedido y lo coordinamos.",
+  icons: {
+    icon: "/logoCA.png",
+    apple: "/logoCA.png",
+  },
 };
 
 export default function RootLayout({

@@ -130,15 +130,12 @@ export default function FullPageScroll({ slides, backgrounds, navLinks }: Props)
         transition: 'opacity 0.4s ease',
         pointerEvents: activeIndex > 0 ? 'auto' : 'none',
       }}>
-        <span style={{
-          color: 'white',
-          fontWeight: 700,
-          fontSize: '1.1rem',
-          letterSpacing: '0.05em',
-          cursor: 'pointer',
-        }} onClick={() => navigateTo(0)}>
-          Casa Amarilla
-        </span>
+        <img
+          src="/logoCA.png"
+          alt="Casa Amarilla"
+          onClick={() => navigateTo(0)}
+          style={{ height: '70px', cursor: 'pointer', userSelect: 'none' }}
+        />
 
         <div style={{ marginLeft: 'auto', display: 'flex', gap: '20px', alignItems: 'center' }}>
           {/* Instagram */}
