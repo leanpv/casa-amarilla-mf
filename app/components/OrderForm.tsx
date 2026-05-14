@@ -2,171 +2,131 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Product, createOrder } from '@/lib/api';
 
-interface Props {
-  selectedProducts: Product[];
-  onClear: () => void;
-}
-
-export default function OrderForm({ selectedProducts, onClear }: Props) {
+export default function OrderForm() {
   const [form, setForm] = useState({ name: '', phone: '', email: '', notes: '' });
-  const [quantities, setQuantities] = useState<Record<string, number>>({});
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
-
-  const getQty = (id: string) => quantities[id] ?? 1;
-
-  const total = selectedProducts.reduce(
-    (sum, p) => sum + p.price * getQty(p._id),
-    0,
-  );
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (selectedProducts.length === 0) return;
-
     setStatus('loading');
-    try {
-      await createOrder({
-        customerName: form.name,
-        customerPhone: form.phone,
-        customerEmail: form.email || undefined,
-        notes: form.notes || undefined,
-        total,
-        items: selectedProducts.map((p) => ({
-          product: p._id,
-          productName: p.name,
-          quantity: getQty(p._id),
-          price: p.price,
-        })),
-      });
-      setStatus('success');
-      onClear();
-    } catch {
-      setStatus('error');
-    }
+    await new Promise(r => setTimeout(r, 800));
+    setStatus('success');
   }
 
   return (
-    <section id="order" className="py-24 px-6 w-full flex flex-col items-center">
-      <div className="w-full max-w-2xl">
-      <motion.h2
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        className="text-4xl font-bold mb-12 text-center"
-        style={{ color: 'var(--accent)' }}
-      >
-        Hacer pedido
-      </motion.h2>
-
-      <AnimatePresence>
-        {status === 'success' ? (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="text-center py-16 text-green-400"
-          >
-            <div className="text-5xl mb-4">✓</div>
-            <p className="text-xl font-semibold">¡Pedido recibido!</p>
-            <p className="mt-2 text-gray-400">Te contactamos a la brevedad.</p>
-          </motion.div>
-        ) : (
-          <motion.form
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            onSubmit={handleSubmit}
-            className="space-y-6"
-          >
-            {selectedProducts.length > 0 && (
-              <div className="rounded-xl p-4 space-y-3" style={{ background: '#1a1a1a' }}>
-                <p className="text-sm text-gray-400 font-medium">Productos seleccionados</p>
-                {selectedProducts.map((p) => (
-                  <div key={p._id} className="flex items-center justify-between gap-4">
-                    <span className="text-sm text-white">{p.name}</span>
-                    <div className="flex items-center gap-3">
-                      <button
-                        type="button"
-                        onClick={() => setQuantities((q) => ({ ...q, [p._id]: Math.max(1, getQty(p._id) - 1) }))}
-                        className="w-7 h-7 rounded-full bg-gray-700 text-white text-sm hover:bg-gray-600"
-                      >
-                        −
-                      </button>
-                      <span className="w-4 text-center text-white">{getQty(p._id)}</span>
-                      <button
-                        type="button"
-                        onClick={() => setQuantities((q) => ({ ...q, [p._id]: getQty(p._id) + 1 }))}
-                        className="w-7 h-7 rounded-full bg-gray-700 text-white text-sm hover:bg-gray-600"
-                      >
-                        +
-                      </button>
-                      <span className="text-sm text-gray-400 w-20 text-right">
-                        ${(p.price * getQty(p._id)).toLocaleString()}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-                <div className="border-t border-gray-700 pt-3 flex justify-between">
-                  <span className="font-semibold text-white">Total</span>
-                  <span className="font-bold" style={{ color: 'var(--accent)' }}>
-                    ${total.toLocaleString()}
-                  </span>
+    <section style={{
+      height: '100%',
+      overflowY: 'auto',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '170px 32px 100px',
+    }}>
+      <div style={{ width: '100%', maxWidth: '520px' }}>
+        <AnimatePresence>
+          {status === 'success' ? (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              style={{ textAlign: 'center', padding: '64px 0', color: 'rgba(255,255,255,0.9)' }}
+            >
+              <div style={{ fontSize: '3rem', marginBottom: '16px' }}>✓</div>
+              <p style={{ fontSize: '1.2rem', fontWeight: 600 }}>¡Pedido recibido!</p>
+              <p style={{ marginTop: '8px', color: 'rgba(255,255,255,0.6)' }}>Te contactamos a la brevedad.</p>
+            </motion.div>
+          ) : (
+            <motion.form
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              onSubmit={handleSubmit}
+              style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
+            >
+              {[
+                { name: 'name', label: 'Nombre *', placeholder: 'Tu nombre', required: true },
+                { name: 'phone', label: 'Teléfono *', placeholder: 'Ej: 1123456789', required: true },
+                { name: 'email', label: 'Email (opcional)', placeholder: 'tu@email.com', required: false },
+              ].map((field) => (
+                <div key={field.name} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <label style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.78rem', fontWeight: 500, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+                    {field.label}
+                  </label>
+                  <input
+                    type="text"
+                    placeholder={field.placeholder}
+                    required={field.required}
+                    value={form[field.name as keyof typeof form]}
+                    onChange={(e) => setForm((f) => ({ ...f, [field.name]: e.target.value }))}
+                    style={{
+                      width: '100%',
+                      padding: '14px 18px',
+                      borderRadius: '12px',
+                      background: 'rgba(255,255,255,0.22)',
+                      border: '1px solid rgba(255,255,255,0.4)',
+                      color: 'white',
+                      fontSize: '0.95rem',
+                      outline: 'none',
+                      boxSizing: 'border-box',
+                    }}
+                  />
                 </div>
-              </div>
-            )}
+              ))}
 
-            {[
-              { name: 'name', label: 'Nombre *', placeholder: 'Tu nombre', required: true },
-              { name: 'phone', label: 'Teléfono *', placeholder: 'Ej: 1123456789', required: true },
-              { name: 'email', label: 'Email (opcional)', placeholder: 'tu@email.com', required: false },
-            ].map((field) => (
-              <div key={field.name}>
-                <label className="block text-sm text-gray-400 mb-2">{field.label}</label>
-                <input
-                  type="text"
-                  placeholder={field.placeholder}
-                  required={field.required}
-                  value={form[field.name as keyof typeof form]}
-                  onChange={(e) => setForm((f) => ({ ...f, [field.name]: e.target.value }))}
-                  className="w-full px-4 py-3 rounded-xl bg-gray-900 border border-gray-700 text-white placeholder-gray-600 focus:outline-none focus:border-yellow-400 transition-colors"
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.78rem', fontWeight: 500, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+                  Notas (opcional)
+                </label>
+                <textarea
+                  rows={3}
+                  placeholder="Indicaciones especiales..."
+                  value={form.notes}
+                  onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
+                  style={{
+                    width: '100%',
+                    padding: '14px 18px',
+                    borderRadius: '12px',
+                    background: 'rgba(255,255,255,0.22)',
+                    border: '1px solid rgba(255,255,255,0.4)',
+                    color: 'white',
+                    fontSize: '0.95rem',
+                    outline: 'none',
+                    resize: 'none',
+                    boxSizing: 'border-box',
+                  }}
                 />
               </div>
-            ))}
 
-            <div>
-              <label className="block text-sm text-gray-400 mb-2">Notas (opcional)</label>
-              <textarea
-                rows={3}
-                placeholder="Indicaciones especiales..."
-                value={form.notes}
-                onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
-                className="w-full px-4 py-3 rounded-xl bg-gray-900 border border-gray-700 text-white placeholder-gray-600 focus:outline-none focus:border-yellow-400 transition-colors resize-none"
-              />
-            </div>
+              {status === 'error' && (
+                <p style={{ color: '#f87171', fontSize: '0.85rem', textAlign: 'center' }}>
+                  Hubo un error. Intentá de nuevo.
+                </p>
+              )}
 
-            {status === 'error' && (
-              <p className="text-red-400 text-sm text-center">
-                Hubo un error. Intentá de nuevo.
-              </p>
-            )}
-
-            <button
-              type="submit"
-              disabled={status === 'loading' || selectedProducts.length === 0}
-              className="w-full py-4 rounded-full font-semibold text-black text-lg transition-all hover:scale-105 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
-              style={{ backgroundColor: 'var(--accent)' }}
-            >
-              {status === 'loading' ? 'Enviando...' : 'Enviar pedido'}
-            </button>
-
-            {selectedProducts.length === 0 && (
-              <p className="text-center text-sm text-gray-500">
-                Seleccioná al menos un producto para hacer el pedido.
-              </p>
-            )}
-          </motion.form>
-        )}
-      </AnimatePresence>
+              <button
+                type="submit"
+                disabled={status === 'loading'}
+                style={{
+                  marginTop: '8px',
+                  width: '100%',
+                  padding: '16px',
+                  borderRadius: '999px',
+                  background: 'white',
+                  color: '#1a1a1a',
+                  fontWeight: 700,
+                  fontSize: '1rem',
+                  border: 'none',
+                  cursor: status === 'loading' ? 'not-allowed' : 'pointer',
+                  opacity: status === 'loading' ? 0.6 : 1,
+                  letterSpacing: '0.02em',
+                  transition: 'opacity 0.2s ease',
+                }}
+              >
+                {status === 'loading' ? 'Enviando...' : 'Enviar pedido'}
+              </button>
+            </motion.form>
+          )}
+        </AnimatePresence>
       </div>
     </section>
   );

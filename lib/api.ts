@@ -12,6 +12,7 @@ export interface Product {
   image: string;
   category?: string;
   available: boolean;
+  variant?: { name: string; description: string };
 }
 
 export interface OrderItem {
