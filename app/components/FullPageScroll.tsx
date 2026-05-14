@@ -241,6 +241,22 @@ export default function FullPageScroll({ slides, backgrounds, navLinks }: Props)
         <div style={{ width: '100px', height: '1px', background: 'white' }} />
       </div>
 
+      {/* By lean */}
+      <div style={{
+        position: 'fixed',
+        bottom: '28px',
+        right: '5vw',
+        zIndex: 100,
+        opacity: activeIndex > 0 ? 1 : 0,
+        transition: 'opacity 0.4s ease',
+        pointerEvents: 'none',
+        color: 'rgba(255,255,255,0.5)',
+        fontSize: '0.72rem',
+        letterSpacing: '0.08em',
+      }}>
+        by lean
+      </div>
+
       {/* Indicadores laterales */}
       <div className="hidden md:flex" style={{
         position: 'fixed',
