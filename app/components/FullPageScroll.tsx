@@ -22,6 +22,8 @@ export default function FullPageScroll({ slides, backgrounds, navLinks }: Props)
   const indexRef = useRef(0);
   const animatingRef = useRef(false);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [footerVisible, setFooterVisible] = useState(true);
+  const [footerText, setFooterText] = useState('Elegí tu sabor');
 
   useEffect(() => {
     document.body.style.overflow = 'hidden';
@@ -65,6 +67,8 @@ export default function FullPageScroll({ slides, backgrounds, navLinks }: Props)
 
     indexRef.current = target;
     setActiveIndex(target);
+    setFooterVisible(false);
+    setTimeout(() => { setFooterText(target === slides.length - 1 ? 'Gracias por elegirnos' : 'Elegí tu sabor'); setFooterVisible(true); }, DURATION - 100);
     setTimeout(() => { animatingRef.current = false; }, DURATION + 50);
   };
 
@@ -134,9 +138,10 @@ export default function FullPageScroll({ slides, backgrounds, navLinks }: Props)
         top: 0,
         left: 0,
         right: 0,
+        height: '64px',
         display: 'flex',
-        alignItems: 'flex-start',
-        padding: '12px 5vw',
+        alignItems: 'center',
+        padding: '0 5vw',
         zIndex: 100,
         opacity: activeIndex > 0 ? 1 : 0,
         transition: 'opacity 0.4s ease',
@@ -218,12 +223,12 @@ export default function FullPageScroll({ slides, backgrounds, navLinks }: Props)
       <div style={{
         position: 'fixed',
         bottom: '80px',
-        left: 0,
-        right: 0,
+        left: '24px',
+        right: '24px',
         justifyContent: 'center',
         zIndex: 100,
-        opacity: activeIndex > 0 ? 1 : 0,
-        transition: activeIndex > 0 ? 'opacity 1.2s ease' : 'opacity 0.2s ease',
+        opacity: activeIndex > 0 && footerVisible ? 1 : 0,
+        transition: footerVisible ? 'opacity 0.4s ease' : 'opacity 0.15s ease',
         pointerEvents: 'none',
         display: 'flex',
         alignItems: 'center',
@@ -231,18 +236,17 @@ export default function FullPageScroll({ slides, backgrounds, navLinks }: Props)
       }}>
         <div style={{ width: '100px', height: '1px', background: 'white' }} />
         <span style={{ color: 'white', fontSize: '0.8rem', letterSpacing: '0.15em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
-          {activeIndex === slides.length - 1 ? 'Gracias por elegirnos' : 'Elegí tu sabor'}
+          {footerText}
         </span>
         <div style={{ width: '100px', height: '1px', background: 'white' }} />
       </div>
 
       {/* Indicadores laterales */}
-      <div style={{
+      <div className="hidden md:flex" style={{
         position: 'fixed',
         right: '24px',
         top: '50%',
         transform: 'translateY(-50%)',
-        display: 'flex',
         flexDirection: 'column',
         gap: '8px',
         alignItems: 'center',
