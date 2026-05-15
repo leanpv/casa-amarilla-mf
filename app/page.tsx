@@ -25,7 +25,7 @@ export default function Home() {
   const slides = [
     <Hero key="hero" />,
     ...products.map(p => <ProductSlide key={p._id} product={p} imageScale={p.category === 'Alfajores' ? 0.75 : 1} />),
-    <OrderForm key="order" />,
+    <OrderForm key="order" products={products} />,
   ];
 
   const backgrounds = [

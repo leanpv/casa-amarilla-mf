@@ -15,11 +15,17 @@ export interface Product {
   variant?: { name: string; description: string };
 }
 
+export interface FlavorItem {
+  name: string;
+  quantity: number;
+}
+
 export interface OrderItem {
-  product: string;
+  product?: string;
   productName: string;
   quantity: number;
   price: number;
+  flavors?: FlavorItem[];
 }
 
 export interface CreateOrderPayload {
