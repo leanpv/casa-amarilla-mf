@@ -25,6 +25,7 @@ export default function FullPageScroll({ slides, backgrounds, navLinks }: Props)
   const [footerVisible, setFooterVisible] = useState(true);
   const [footerText, setFooterText] = useState('Elegí tu sabor');
   const [isWide, setIsWide] = useState(false);
+  const [isNarrowNav, setIsNarrowNav] = useState(false);
 
   useEffect(() => {
     document.body.style.overflow = 'hidden';
@@ -32,7 +33,10 @@ export default function FullPageScroll({ slides, backgrounds, navLinks }: Props)
   }, []);
 
   useEffect(() => {
-    const check = () => setIsWide(window.innerWidth >= 768);
+    const check = () => {
+      setIsWide(window.innerWidth >= 768);
+      setIsNarrowNav(window.innerWidth < 600);
+    };
     check();
     window.addEventListener('resize', check);
     return () => window.removeEventListener('resize', check);
@@ -162,25 +166,41 @@ export default function FullPageScroll({ slides, backgrounds, navLinks }: Props)
           src="/logoCA.png"
           alt="Casa Amarilla"
           onClick={() => navigateTo(0)}
-          style={{ height: 'clamp(40px, 8vw, 70px)', cursor: 'pointer', userSelect: 'none' }}
+          style={{ flex: '0 0 auto', height: 'clamp(40px, 8vw, 70px)', cursor: 'pointer', userSelect: 'none' }}
         />
 
-        <span className="max-[430px]:hidden" style={{
-          position: 'absolute',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          color: 'white',
-          fontWeight: 700,
-          fontSize: 'clamp(0.85rem, 1.5vw, 1.1rem)',
-          letterSpacing: '0.12em',
-          textTransform: 'uppercase',
-          pointerEvents: 'none',
-          userSelect: 'none',
-        }}>
-          Casa Amarilla
-        </span>
+        {isNarrowNav ? (
+          <div style={{ flex: '1 1 auto', display: 'flex', justifyContent: 'center' }}>
+            <span className="max-[430px]:hidden" style={{
+              color: 'white',
+              fontWeight: 700,
+              fontSize: 'clamp(0.85rem, 1.5vw, 1.1rem)',
+              letterSpacing: '0.12em',
+              textTransform: 'uppercase',
+              pointerEvents: 'none',
+              userSelect: 'none',
+            }}>
+              Casa Amarilla
+            </span>
+          </div>
+        ) : (
+          <span style={{
+            position: 'absolute',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            color: 'white',
+            fontWeight: 700,
+            fontSize: 'clamp(0.85rem, 1.5vw, 1.1rem)',
+            letterSpacing: '0.12em',
+            textTransform: 'uppercase',
+            pointerEvents: 'none',
+            userSelect: 'none',
+          }}>
+            Casa Amarilla
+          </span>
+        )}
 
-        <div style={{ marginLeft: 'auto', display: 'flex', gap: '20px', alignItems: 'center' }}>
+        <div style={{ marginLeft: 'auto', flex: '0 0 auto', display: 'flex', gap: '20px', alignItems: 'center' }}>
           {/* Instagram */}
           <a href="https://www.instagram.com/casaamarilla.mex/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" style={{ color: 'white', display: 'flex' }}>
             <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
