@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import NextImage from 'next/image';
 import { Product } from '@/lib/api';
 
 const H_DURATION = 0.42;
@@ -94,8 +95,6 @@ export default function ProductSlide({ product, imageScale = 1 }: { product: Pro
   });
 
   const rightPanel = rightPanels[rightIndex];
-  const imgStyleMobile: React.CSSProperties = { width: `${Math.min(85, 85 * imageScale)}vw`, maxHeight: '45vh', objectFit: 'contain', userSelect: 'none', pointerEvents: 'none' };
-  const imgStyleDesktop: React.CSSProperties = { width: `${50 * imageScale}vw`, maxWidth: `${50 * imageScale}vw`, height: '100vh', objectFit: 'contain', userSelect: 'none', pointerEvents: 'none' };
 
   return (
     <div style={{ height: '100%', position: 'relative', overflow: 'hidden' }}>
@@ -112,11 +111,15 @@ export default function ProductSlide({ product, imageScale = 1 }: { product: Pro
           transition={{ duration: H_DURATION, ease: [0.4, 0, 0.2, 1] }}
           style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
         >
-          <img
-            src={images[hIndex]}
-            alt=""
-            style={isMobile ? imgStyleMobile : imgStyleDesktop}
-          />
+          {isMobile ? (
+            <div style={{ position: 'relative', width: `${Math.min(85, 85 * imageScale)}vw`, height: '45vh' }}>
+              <NextImage src={images[hIndex]} alt="" fill sizes={`${Math.min(85, 85 * imageScale)}vw`} style={{ objectFit: 'contain', userSelect: 'none', pointerEvents: 'none' }} />
+            </div>
+          ) : (
+            <div style={{ position: 'relative', width: `${50 * imageScale}vw`, height: '100vh' }}>
+              <NextImage src={images[hIndex]} alt="" fill sizes={`${50 * imageScale}vw`} style={{ objectFit: 'contain', userSelect: 'none', pointerEvents: 'none' }} priority />
+            </div>
+          )}
         </motion.div>
       </AnimatePresence>
 
