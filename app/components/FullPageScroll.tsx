@@ -170,7 +170,7 @@ export default function FullPageScroll({ slides, backgrounds, navLinks }: Props)
         pointerEvents: activeIndex > 0 ? 'auto' : 'none',
       }}>
         <img
-          src="https://tvecwpfftdrzfeprefpl.supabase.co/storage/v1/object/public/images/logoCA.png"
+          src="https://casa-amarilla-mf.vercel.app/logoCA.png"
           alt="Casa Amarilla"
           onClick={() => navigateTo(0)}
           style={{ flex: '0 0 auto', height: 'clamp(40px, 8vw, 70px)', cursor: 'pointer', userSelect: 'none' }}

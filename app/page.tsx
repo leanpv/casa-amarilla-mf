@@ -20,7 +20,7 @@ const PRODUCTS: Product[] = [
     name: 'Empanadas x12',
     description: 'Docena de empanadas caseras. Rellenos a elección: carne, pollo o jamón y queso.',
     price: 4800,
-    image: 'https://tvecwpfftdrzfeprefpl.supabase.co/storage/v1/object/public/images/empanada2.png',
+    image: 'https://casa-amarilla-mf.vercel.app/empanada2.png',
     category: 'Empanadas',
     available: true,
     variant: {
@@ -33,7 +33,7 @@ const PRODUCTS: Product[] = [
     name: 'Alfajor de ganache',
     description: 'Alfajor artesanal relleno de ganache de maní. Cobertura de chocolate semiamargo.',
     price: 1200,
-    image: 'https://tvecwpfftdrzfeprefpl.supabase.co/storage/v1/object/public/images/alfajor.png',
+    image: 'https://casa-amarilla-mf.vercel.app/alfajor.png',
     category: 'Alfajores',
     available: true,
     variant: {
