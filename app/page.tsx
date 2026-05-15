@@ -1,11 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import FullPageScroll from './components/FullPageScroll';
 import Hero from './components/Hero';
 import ProductSlide from './components/ProductSlide';
 import OrderForm from './components/OrderForm';
-import { Product, getProducts } from '@/lib/api';
+import { Product } from '@/lib/api';
 
 const DARK = 'radial-gradient(ellipse at center, #f7a65b 0%, #f57b18 100%)';
 
@@ -15,22 +14,45 @@ const PRODUCT_BACKGROUNDS = [
   'radial-gradient(ellipse at center, #ffe07a 0%, #9e7402 100%)',
 ];
 
+const PRODUCTS: Product[] = [
+  {
+    _id: '',
+    name: 'Empanadas x12',
+    description: 'Docena de empanadas caseras. Rellenos a elección: carne, pollo o jamón y queso.',
+    price: 4800,
+    image: 'https://tvecwpfftdrzfeprefpl.supabase.co/storage/v1/object/public/images/empanada2.png',
+    category: 'Empanadas',
+    available: true,
+    variant: {
+      name: 'Carne',
+      description: 'Relleno de carne cortada a cuchillo con cebolla, morrón rojo, huevo duro y aceitunas verdes. Condimentada con comino, pimentón dulce y ají molido.',
+    },
+  },
+  {
+    _id: '',
+    name: 'Alfajor de ganache',
+    description: 'Alfajor artesanal relleno de ganache de maní. Cobertura de chocolate semiamargo.',
+    price: 1200,
+    image: 'https://tvecwpfftdrzfeprefpl.supabase.co/storage/v1/object/public/images/alfajor.png',
+    category: 'Alfajores',
+    available: true,
+    variant: {
+      name: 'Ganache de Maní',
+      description: 'Relleno cremoso de ganache de maní tostado, entre dos tapas de masa sablée. Bañado en chocolate semiamargo artesanal.',
+    },
+  },
+];
+
 export default function Home() {
-  const [products, setProducts] = useState<Product[]>([]);
-
-  useEffect(() => {
-    getProducts().then(setProducts);
-  }, []);
-
   const slides = [
     <Hero key="hero" />,
-    ...products.map(p => <ProductSlide key={p._id} product={p} imageScale={p.category === 'Alfajores' ? 0.75 : 1} />),
-    <OrderForm key="order" products={products} />,
+    ...PRODUCTS.map(p => <ProductSlide key={p.name} product={p} imageScale={p.category === 'Alfajores' ? 0.75 : 1} />),
+    <OrderForm key="order" />,
   ];
 
   const backgrounds = [
     DARK,
-    ...products.map((_, i) => PRODUCT_BACKGROUNDS[i % PRODUCT_BACKGROUNDS.length]),
+    ...PRODUCTS.map((_, i) => PRODUCT_BACKGROUNDS[i % PRODUCT_BACKGROUNDS.length]),
     DARK,
   ];
 

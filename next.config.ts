@@ -7,6 +7,10 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'casa-amarilla-mf.vercel.app',
       },
+      {
+        protocol: 'https',
+        hostname: 'tvecwpfftdrzfeprefpl.supabase.co',
+      },
     ],
   },
 };

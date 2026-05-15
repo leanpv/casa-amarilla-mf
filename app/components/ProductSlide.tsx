@@ -15,10 +15,10 @@ interface SubProduct {
 
 const SUB_PRODUCTS: Record<string, SubProduct[]> = {
   'Empanadas': [
-    { image: '/espinaca.png', name: 'Espinaca', description: 'Relleno de espinaca y ricota, una clásica empanada argentina.' },
+    { image: 'https://tvecwpfftdrzfeprefpl.supabase.co/storage/v1/object/public/images/espinaca.png', name: 'Espinaca', description: 'Relleno de espinaca y ricota, una clásica empanada argentina.' },
   ],
   'Alfajores': [
-    { image: '/avellana.png', name: 'Avellana', description: 'Alfajor relleno de suave crema de avellanas, bañado en chocolate. Una combinación irresistible.' },
+    { image: 'https://tvecwpfftdrzfeprefpl.supabase.co/storage/v1/object/public/images/avellana.png', name: 'Avellana', description: 'Alfajor relleno de suave crema de avellanas, bañado en chocolate. Una combinación irresistible.' },
   ],
 };
 

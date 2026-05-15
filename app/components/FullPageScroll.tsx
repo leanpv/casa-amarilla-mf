@@ -141,7 +141,14 @@ export default function FullPageScroll({ slides, backgrounds, navLinks }: Props)
         <div
           key={i}
           ref={el => { slideRefs.current[i] = el; }}
-          style={{ position: 'absolute', inset: 0, overflow: 'hidden auto', zIndex: 1 }}
+          style={{
+            position: 'absolute',
+            inset: 0,
+            overflow: 'hidden auto',
+            zIndex: 1,
+            transform: i === 0 ? 'translateY(0) scale(1)' : 'translateY(100%) scale(0.8)',
+            opacity: i === 0 ? 1 : 0,
+          }}
         >
           {slide}
         </div>
@@ -163,7 +170,7 @@ export default function FullPageScroll({ slides, backgrounds, navLinks }: Props)
         pointerEvents: activeIndex > 0 ? 'auto' : 'none',
       }}>
         <img
-          src="/logoCA.png"
+          src="https://tvecwpfftdrzfeprefpl.supabase.co/storage/v1/object/public/images/logoCA.png"
           alt="Casa Amarilla"
           onClick={() => navigateTo(0)}
           style={{ flex: '0 0 auto', height: 'clamp(40px, 8vw, 70px)', cursor: 'pointer', userSelect: 'none' }}

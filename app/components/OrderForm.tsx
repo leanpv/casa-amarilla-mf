@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { createOrder, Product } from '@/lib/api';
+import { createOrder } from '@/lib/api';
 
 const QUANTITIES = [6, 12, 18, 24] as const;
 type Qty = typeof QUANTITIES[number];
@@ -220,7 +220,7 @@ const labelStyle: React.CSSProperties = {
   textTransform: 'uppercase',
 };
 
-export default function OrderForm({ products = [] }: { products?: Product[] }) {
+export default function OrderForm() {
   const [empanadas, setEmpanadas] = useState<ProductState>({
     active: false, qty: 6, flavors: initFlavors('Empanadas'),
   });
@@ -265,20 +265,15 @@ export default function OrderForm({ products = [] }: { products?: Product[] }) {
     setValidationError('');
     setStatus('loading');
 
-    const empProduct = products.find(p => p.category === 'Empanadas');
-    const alfProduct = products.find(p => p.category === 'Alfajores');
-
-    type Item = { product?: string; productName: string; quantity: number; price: number; flavors: { name: string; quantity: number }[] };
+    type Item = { productName: string; quantity: number; price: number; flavors: { name: string; quantity: number }[] };
     const items: Item[] = [];
     if (empanadas.active) items.push({
-      product: empProduct?._id,
       productName: 'Empanadas',
       quantity: empanadas.qty,
       price: calcSubtotal('Empanadas', empanadas.qty),
       flavors: Object.entries(empanadas.flavors).filter(([, q]) => q > 0).map(([name, quantity]) => ({ name, quantity })),
     });
     if (alfajores.active) items.push({
-      product: alfProduct?._id,
       productName: 'Alfajores',
       quantity: alfajores.qty,
       price: calcSubtotal('Alfajores', alfajores.qty),
