@@ -24,10 +24,18 @@ export default function FullPageScroll({ slides, backgrounds, navLinks }: Props)
   const [activeIndex, setActiveIndex] = useState(0);
   const [footerVisible, setFooterVisible] = useState(true);
   const [footerText, setFooterText] = useState('Elegí tu sabor');
+  const [isWide, setIsWide] = useState(false);
 
   useEffect(() => {
     document.body.style.overflow = 'hidden';
     return () => { document.body.style.overflow = ''; };
+  }, []);
+
+  useEffect(() => {
+    const check = () => setIsWide(window.innerWidth >= 768);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
   }, []);
 
   useEffect(() => {
@@ -85,13 +93,16 @@ export default function FullPageScroll({ slides, backgrounds, navLinks }: Props)
       if (e.key === 'ArrowUp') navigate(-1);
     };
 
+    let touchStartX = 0;
     let touchStartY = 0;
     const handleTouchStart = (e: TouchEvent) => {
+      touchStartX = e.touches[0].clientX;
       touchStartY = e.touches[0].clientY;
     };
     const handleTouchEnd = (e: TouchEvent) => {
-      const delta = touchStartY - e.changedTouches[0].clientY;
-      if (Math.abs(delta) > 40) navigate(delta > 0 ? 1 : -1);
+      const dx = touchStartX - e.changedTouches[0].clientX;
+      const dy = touchStartY - e.changedTouches[0].clientY;
+      if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 40) navigate(dy > 0 ? 1 : -1);
     };
 
     window.addEventListener('wheel', handleWheel, { passive: false });
@@ -154,6 +165,21 @@ export default function FullPageScroll({ slides, backgrounds, navLinks }: Props)
           style={{ height: 'clamp(40px, 8vw, 70px)', cursor: 'pointer', userSelect: 'none' }}
         />
 
+        <span className="max-[430px]:hidden" style={{
+          position: 'absolute',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          color: 'white',
+          fontWeight: 700,
+          fontSize: 'clamp(0.85rem, 1.5vw, 1.1rem)',
+          letterSpacing: '0.12em',
+          textTransform: 'uppercase',
+          pointerEvents: 'none',
+          userSelect: 'none',
+        }}>
+          Casa Amarilla
+        </span>
+
         <div style={{ marginLeft: 'auto', display: 'flex', gap: '20px', alignItems: 'center' }}>
           {/* Instagram */}
           <a href="https://www.instagram.com/casaamarilla.mex/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" style={{ color: 'white', display: 'flex' }}>
@@ -180,7 +206,7 @@ export default function FullPageScroll({ slides, backgrounds, navLinks }: Props)
       {navLinks && (
         <div style={{
           position: 'fixed',
-          top: '130px',
+          top: isWide ? '100px' : '12%',
           left: '50%',
           transform: 'translateX(-50%)',
           display: 'flex',
@@ -222,12 +248,12 @@ export default function FullPageScroll({ slides, backgrounds, navLinks }: Props)
       {/* Footer */}
       <div style={{
         position: 'fixed',
-        bottom: '80px',
+        bottom: isWide ? '50px' : '80px',
         left: '24px',
         right: '24px',
         justifyContent: 'center',
         zIndex: 100,
-        opacity: activeIndex > 0 && footerVisible ? 1 : 0,
+        opacity: activeIndex > 0 && footerVisible && (isWide || activeIndex !== slides.length - 1) ? 1 : 0,
         transition: footerVisible ? 'opacity 0.4s ease' : 'opacity 0.15s ease',
         pointerEvents: 'none',
         display: 'flex',
@@ -244,7 +270,7 @@ export default function FullPageScroll({ slides, backgrounds, navLinks }: Props)
       {/* By lean */}
       <div style={{
         position: 'fixed',
-        bottom: '28px',
+        bottom: isWide ? '28px' : '5px',
         right: '5vw',
         zIndex: 100,
         opacity: activeIndex > 0 ? 1 : 0,

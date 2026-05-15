@@ -17,12 +17,12 @@ export default function OrderForm() {
   return (
     <section style={{
       height: '100%',
-      overflowY: 'auto',
+      overflow: 'hidden',
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      padding: '170px 32px 100px',
+      padding: '155px 24px 56px',
     }}>
       <div style={{ width: '100%', maxWidth: '520px' }}>
         <AnimatePresence>
@@ -124,6 +124,14 @@ export default function OrderForm() {
               >
                 {status === 'loading' ? 'Enviando...' : 'Enviar pedido'}
               </button>
+
+              <div className="flex md:hidden [@media(max-height:700px)]:hidden" style={{ alignItems: 'center', gap: '16px', justifyContent: 'center', marginTop: '24px' }}>
+                <div style={{ flex: 1, height: '1px', background: 'white' }} />
+                <span style={{ color: 'white', fontSize: '0.8rem', letterSpacing: '0.15em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
+                  Gracias por elegirnos
+                </span>
+                <div style={{ flex: 1, height: '1px', background: 'white' }} />
+              </div>
             </motion.form>
           )}
         </AnimatePresence>
