@@ -99,6 +99,15 @@ export default function ProductSlide({ product, imageScale = 1 }: { product: Pro
   return (
     <div style={{ height: '100%', position: 'relative', overflow: 'hidden' }}>
 
+      {/* Preload oculto de todas las imágenes del carrusel */}
+      <div style={{ position: 'absolute', opacity: 0, pointerEvents: 'none', zIndex: -1 }}>
+        {images.map((src, i) => (
+          <div key={`pre-${i}`} style={{ position: 'relative', width: isMobile ? `${Math.min(85, 85 * imageScale)}vw` : `${50 * imageScale}vw`, height: isMobile ? '45vh' : '100vh' }}>
+            <NextImage src={src} alt="" fill priority sizes={isMobile ? `${Math.min(85, 85 * imageScale)}vw` : `${50 * imageScale}vw`} style={{ objectFit: 'contain' }} />
+          </div>
+        ))}
+      </div>
+
       {/* Track de imágenes con dirección */}
       <AnimatePresence initial={false} custom={direction}>
         <motion.div
