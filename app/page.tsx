@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import FullPageScroll from './components/FullPageScroll';
 import Hero from './components/Hero';
 import ProductSlide from './components/ProductSlide';
@@ -7,6 +8,7 @@ import OrderForm from './components/OrderForm';
 import { Product } from '@/lib/api';
 
 const DARK = 'radial-gradient(ellipse at center, #f7a65b 0%, #f57b18 100%)';
+const ORDER_BG = 'radial-gradient(70% 60% at 20% 30%, rgba(232,184,75,0.06), transparent), radial-gradient(60% 60% at 80% 80%, rgba(245,123,24,0.05), transparent), #0a0a0a';
 
 const PRODUCT_BACKGROUNDS = [
   'radial-gradient(ellipse at center, #f7a65b 0%, #e46e0e 100%)',
@@ -19,7 +21,7 @@ const PRODUCTS: Product[] = [
     _id: '',
     name: 'Empanadas x12',
     description: 'Docena de empanadas caseras. Rellenos a elección: carne, pollo o jamón y queso.',
-    price: 4800,
+    price: 10,
     image: 'https://casa-amarilla-mf.vercel.app/empanada2.png',
     category: 'Empanadas',
     available: true,
@@ -32,7 +34,7 @@ const PRODUCTS: Product[] = [
     _id: '',
     name: 'Alfajor de ganache',
     description: 'Alfajor artesanal relleno de ganache de maní. Cobertura de chocolate semiamargo.',
-    price: 1200,
+    price: 8,
     image: 'https://casa-amarilla-mf.vercel.app/alfajor.png',
     category: 'Alfajores',
     available: true,
@@ -44,16 +46,21 @@ const PRODUCTS: Product[] = [
 ];
 
 export default function Home() {
+  const [orderActive, setOrderActive] = useState(false);
+  const [orderNavCount, setOrderNavCount] = useState(0);
+  const [autoNavigate, setAutoNavigate] = useState<number | undefined>();
+  const [heroLocked, setHeroLocked] = useState(false);
+
   const slides = [
-    <Hero key="hero" />,
-    ...PRODUCTS.map(p => <ProductSlide key={p.name} product={p} imageScale={p.category === 'Alfajores' ? 0.75 : 1} />),
-    <OrderForm key="order" />,
+    <Hero key="hero" onComplete={() => { setAutoNavigate(1); setHeroLocked(true); }} />,
+    ...PRODUCTS.map((p, i) => <ProductSlide key={p.name} product={p} index={i + 1} imageScale={p.category === 'Alfajores' ? 0.75 : 1} />),
+    <OrderForm key="order" isActive={orderActive} navCount={orderNavCount} />,
   ];
 
   const backgrounds = [
     DARK,
     ...PRODUCTS.map((_, i) => PRODUCT_BACKGROUNDS[i % PRODUCT_BACKGROUNDS.length]),
-    DARK,
+    ORDER_BG,
   ];
 
   const navLinks = [
@@ -61,5 +68,9 @@ export default function Home() {
     { label: 'Contacto', index: slides.length - 1 },
   ];
 
-  return <FullPageScroll slides={slides} backgrounds={backgrounds} navLinks={navLinks} />;
+  return <FullPageScroll slides={slides} backgrounds={backgrounds} navLinks={navLinks} autoNavigateTo={autoNavigate} minSlideIndex={heroLocked ? 1 : 0} onSlideChange={(i) => {
+    const isOrder = i === slides.length - 1;
+    setOrderActive(isOrder);
+    if (isOrder) setOrderNavCount(c => c + 1);
+  }} />;
 }

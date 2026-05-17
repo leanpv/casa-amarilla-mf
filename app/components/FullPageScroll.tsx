@@ -6,26 +6,40 @@ const DURATION = 650;
 const EASE = 'cubic-bezier(0.4, 0, 0.2, 1)';
 const TRANSITION = `transform ${DURATION}ms ${EASE}, opacity ${DURATION}ms ease`;
 
-interface NavLink {
-  label: string;
-  index: number;
-}
 
-interface Props {
-  slides: ReactNode[];
-  backgrounds?: string[];
-  navLinks?: NavLink[];
-}
+const IconInstagram = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+    <rect x="3" y="3" width="18" height="18" rx="5" />
+    <circle cx="12" cy="12" r="4" />
+    <circle cx="17.5" cy="6.5" r="0.8" fill="currentColor" stroke="none" />
+  </svg>
+);
 
-export default function FullPageScroll({ slides, backgrounds, navLinks }: Props) {
+const IconFacebook = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M13.5 22v-8h2.7l.4-3.1h-3.1V8.9c0-.9.25-1.5 1.55-1.5h1.65V4.6c-.3-.04-1.3-.13-2.45-.13-2.43 0-4.1 1.48-4.1 4.2v2.34H7.5V14h2.65v8h3.35z" />
+  </svg>
+);
+
+const IconWhatsApp = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.46 1.32 4.95L2 22l5.25-1.38a9.86 9.86 0 0 0 4.78 1.22h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.02A9.83 9.83 0 0 0 12.04 2zm5.6 14.04c-.24.67-1.4 1.28-1.94 1.36-.49.07-1.12.1-1.81-.11-.42-.13-.96-.31-1.65-.6-2.91-1.26-4.81-4.18-4.96-4.38-.14-.2-1.19-1.58-1.19-3.02 0-1.43.75-2.14 1.02-2.43.27-.29.58-.36.78-.36h.56c.18 0 .42-.07.66.5.24.59.83 2.04.9 2.18.07.15.12.32.02.51-.1.2-.15.32-.29.49-.14.17-.31.39-.44.52-.14.14-.29.3-.13.59.17.29.74 1.22 1.59 1.98 1.09.97 2.01 1.27 2.3 1.42.29.14.46.12.63-.07.17-.2.72-.84.92-1.13.2-.29.39-.24.66-.15.27.1 1.72.81 2.01.96.29.15.49.22.56.34.07.12.07.71-.17 1.39z" />
+  </svg>
+);
+
+const SLIDE_LABELS = ['Inicio', 'Empanadas', 'Alfajores', 'Pedido'];
+
+interface NavLink { label: string; index: number; }
+interface Props { slides: ReactNode[]; backgrounds?: string[]; navLinks?: NavLink[]; onSlideChange?: (index: number) => void; autoNavigateTo?: number; minSlideIndex?: number; }
+
+export default function FullPageScroll({ slides, backgrounds, navLinks, onSlideChange, autoNavigateTo, minSlideIndex = 0 }: Props) {
   const slideRefs = useRef<(HTMLDivElement | null)[]>([]);
   const indexRef = useRef(0);
   const animatingRef = useRef(false);
+  const minSlideIndexRef = useRef(minSlideIndex);
+  useEffect(() => { minSlideIndexRef.current = minSlideIndex; }, [minSlideIndex]);
   const [activeIndex, setActiveIndex] = useState(0);
-  const [footerVisible, setFooterVisible] = useState(true);
-  const [footerText, setFooterText] = useState('Elegí tu sabor');
   const [isWide, setIsWide] = useState(false);
-  const [isNarrowNav, setIsNarrowNav] = useState(false);
 
   useEffect(() => {
     document.body.style.overflow = 'hidden';
@@ -33,10 +47,7 @@ export default function FullPageScroll({ slides, backgrounds, navLinks }: Props)
   }, []);
 
   useEffect(() => {
-    const check = () => {
-      setIsWide(window.innerWidth >= 768);
-      setIsNarrowNav(window.innerWidth < 600);
-    };
+    const check = () => setIsWide(window.innerWidth >= 768);
     check();
     window.addEventListener('resize', check);
     return () => window.removeEventListener('resize', check);
@@ -53,10 +64,16 @@ export default function FullPageScroll({ slides, backgrounds, navLinks }: Props)
     setActiveIndex(0);
   }, [slides.length]);
 
+  useEffect(() => {
+    if (autoNavigateTo !== undefined) navigateTo(autoNavigateTo);
+  }, [autoNavigateTo]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const navigateTo = (target: number) => {
     if (animatingRef.current) return;
+    if (target < minSlideIndexRef.current || target >= slides.length) return;
+    onSlideChange?.(target);
     const current = indexRef.current;
-    if (current === target || target < 0 || target >= slides.length) return;
+    if (current === target) return;
 
     const currentSlide = slideRefs.current[current];
     const nextSlide = slideRefs.current[target];
@@ -79,36 +96,23 @@ export default function FullPageScroll({ slides, backgrounds, navLinks }: Props)
 
     indexRef.current = target;
     setActiveIndex(target);
-    setFooterVisible(false);
-    setTimeout(() => { setFooterText(target === slides.length - 1 ? 'Gracias por elegirnos' : 'Elegí tu sabor'); setFooterVisible(true); }, DURATION - 100);
     setTimeout(() => { animatingRef.current = false; }, DURATION + 50);
   };
 
   useEffect(() => {
     const navigate = (dir: 1 | -1) => navigateTo(indexRef.current + dir);
-
-    const handleWheel = (e: WheelEvent) => {
-      e.preventDefault();
-      navigate(e.deltaY > 0 ? 1 : -1);
-    };
-
+    const handleWheel = (e: WheelEvent) => { e.preventDefault(); navigate(e.deltaY > 0 ? 1 : -1); };
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'ArrowDown') navigate(1);
       if (e.key === 'ArrowUp') navigate(-1);
     };
-
-    let touchStartX = 0;
-    let touchStartY = 0;
-    const handleTouchStart = (e: TouchEvent) => {
-      touchStartX = e.touches[0].clientX;
-      touchStartY = e.touches[0].clientY;
-    };
+    let touchStartX = 0, touchStartY = 0;
+    const handleTouchStart = (e: TouchEvent) => { touchStartX = e.touches[0].clientX; touchStartY = e.touches[0].clientY; };
     const handleTouchEnd = (e: TouchEvent) => {
       const dx = touchStartX - e.changedTouches[0].clientX;
       const dy = touchStartY - e.changedTouches[0].clientY;
       if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 40) navigate(dy > 0 ? 1 : -1);
     };
-
     window.addEventListener('wheel', handleWheel, { passive: false });
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('touchstart', handleTouchStart, { passive: true });
@@ -121,18 +125,17 @@ export default function FullPageScroll({ slides, backgrounds, navLinks }: Props)
     };
   }, [slides.length]);
 
+  const navVisible = activeIndex > 0;
+
   return (
     <div style={{ position: 'fixed', inset: 0, overflow: 'hidden' }}>
 
-      {/* Fondos con crossfade */}
+      {/* Backgrounds */}
       {backgrounds?.map((bg, i) => (
         <div key={i} style={{
-          position: 'absolute',
-          inset: 0,
-          background: bg,
+          position: 'absolute', inset: 0, background: bg,
           opacity: i === activeIndex ? 1 : 0,
-          transition: `opacity ${DURATION}ms ease`,
-          zIndex: 0,
+          transition: `opacity ${DURATION}ms ease`, zIndex: 0,
         }} />
       ))}
 
@@ -142,10 +145,7 @@ export default function FullPageScroll({ slides, backgrounds, navLinks }: Props)
           key={i}
           ref={el => { slideRefs.current[i] = el; }}
           style={{
-            position: 'absolute',
-            inset: 0,
-            overflow: 'hidden auto',
-            zIndex: 1,
+            position: 'absolute', inset: 0, overflow: 'hidden', zIndex: 1,
             transform: i === 0 ? 'translateY(0) scale(1)' : 'translateY(100%) scale(0.8)',
             opacity: i === 0 ? 1 : 0,
           }}
@@ -156,92 +156,53 @@ export default function FullPageScroll({ slides, backgrounds, navLinks }: Props)
 
       {/* Navbar */}
       <div style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        height: '64px',
-        display: 'flex',
-        alignItems: 'center',
-        padding: '0 5vw',
-        zIndex: 100,
-        opacity: activeIndex > 0 ? 1 : 0,
-        transition: 'opacity 0.4s ease',
-        pointerEvents: activeIndex > 0 ? 'auto' : 'none',
+        position: 'fixed', top: 0, left: 0, right: 0, height: '64px',
+        display: 'grid', gridTemplateColumns: isWide ? '1fr auto 1fr' : '1fr auto', alignItems: 'center',
+        padding: '0 28px', zIndex: 100,
+        background: 'linear-gradient(180deg, rgba(10,10,10,0.92), rgba(10,10,10,0.4) 70%, transparent)',
+        backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)',
+        opacity: navVisible ? 1 : 0,
+        transform: navVisible ? 'translateY(0)' : 'translateY(-100%)',
+        transition: 'opacity 0.5s ease, transform 0.5s ease',
+        pointerEvents: navVisible ? 'auto' : 'none',
       }}>
-        <img
-          src="https://casa-amarilla-mf.vercel.app/logoCA.png"
-          alt="Casa Amarilla"
+        <button
           onClick={() => navigateTo(0)}
-          style={{ flex: '0 0 auto', height: 'clamp(40px, 8vw, 70px)', cursor: 'pointer', userSelect: 'none' }}
-        />
-
-        {isNarrowNav ? (
-          <div style={{ flex: '1 1 auto', display: 'flex', justifyContent: 'center' }}>
-            <span className="max-[430px]:hidden" style={{
-              color: 'white',
-              fontWeight: 700,
-              fontSize: 'clamp(0.85rem, 1.5vw, 1.1rem)',
-              letterSpacing: '0.12em',
-              textTransform: 'uppercase',
-              pointerEvents: 'none',
-              userSelect: 'none',
-            }}>
-              Casa Amarilla
-            </span>
-          </div>
-        ) : (
-          <span style={{
-            position: 'absolute',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            color: 'white',
-            fontWeight: 700,
-            fontSize: 'clamp(0.85rem, 1.5vw, 1.1rem)',
-            letterSpacing: '0.12em',
-            textTransform: 'uppercase',
-            pointerEvents: 'none',
-            userSelect: 'none',
-          }}>
+          style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+        >
+          <img src="/logoCA.png" alt="Casa Amarilla" style={{ width: '44px', height: '44px', objectFit: 'contain' }} />
+          <span style={{ fontFamily: 'var(--font-geist-mono), monospace', fontSize: '11px', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--foreground)' }}>
             Casa Amarilla
+          </span>
+        </button>
+
+        {isWide && (
+          <span style={{ fontWeight: 800, fontSize: '13px', letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--foreground)', whiteSpace: 'nowrap' }}>
+            Productos Argentinos · CDMX
           </span>
         )}
 
-        <div style={{ marginLeft: 'auto', flex: '0 0 auto', display: 'flex', gap: '20px', alignItems: 'center' }}>
-          {/* Instagram */}
-          <a href="https://www.instagram.com/casaamarilla.mex/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" style={{ color: 'white', display: 'flex' }}>
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-            </svg>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '6px' }}>
+          <a href="https://www.instagram.com/casaamarilla.mex/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="nav-social-link">
+            <IconInstagram />
           </a>
-          {/* Facebook */}
-          <a href="https://www.instagram.com/casaamarilla.mex/" target="_blank" rel="noopener noreferrer" aria-label="Facebook" style={{ color: 'white', display: 'flex' }}>
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-            </svg>
+          <a href="https://www.instagram.com/casaamarilla.mex/" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="nav-social-link">
+            <IconFacebook />
           </a>
-          {/* WhatsApp */}
-          <a href="https://www.instagram.com/casaamarilla.mex/" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" style={{ color: 'white', display: 'flex' }}>
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-            </svg>
+          <a href="https://www.instagram.com/casaamarilla.mex/" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" className="nav-social-link">
+            <IconWhatsApp />
           </a>
         </div>
       </div>
 
-      {/* Nav superior */}
+      {/* Nav pills */}
       {navLinks && (
         <div style={{
-          position: 'fixed',
-          top: isWide ? '100px' : '12%',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          display: 'flex',
-          gap: '12px',
-          zIndex: 100,
-          opacity: activeIndex > 0 ? 1 : 0,
-          transition: activeIndex > 0 ? 'opacity 1.2s ease' : 'opacity 0.2s ease',
-          pointerEvents: activeIndex > 0 ? 'auto' : 'none',
+          position: 'fixed', top: '78px', left: '50%', transform: 'translateX(-50%)',
+          display: 'flex', gap: '8px', zIndex: 100,
+          opacity: navVisible ? 1 : 0,
+          transition: navVisible ? 'opacity 1.2s ease' : 'opacity 0.2s ease',
+          pointerEvents: navVisible ? 'auto' : 'none',
         }}>
           {navLinks.map(({ label, index }) => {
             const isLast = index === slides.length - 1;
@@ -253,16 +214,13 @@ export default function FullPageScroll({ slides, backgrounds, navLinks }: Props)
                 key={label}
                 onClick={() => navigateTo(index)}
                 style={{
-                  background: active ? 'white' : 'rgba(255,255,255,0.18)',
-                  color: active ? '#0a0a0a' : 'white',
-                  border: 'none',
-                  padding: 'clamp(6px, 1.5vw, 10px) clamp(14px, 3vw, 28px)',
-                  borderRadius: '999px',
-                  fontWeight: 600,
-                  fontSize: 'clamp(0.75rem, 2vw, 0.9rem)',
-                  cursor: 'pointer',
-                  letterSpacing: '0.02em',
-                  transition: 'background 0.3s ease, color 0.3s ease',
+                  background: active ? 'var(--accent)' : 'rgba(245,240,232,0.06)',
+                  color: active ? '#0a0a0a' : 'var(--foreground)',
+                  border: `1px solid ${active ? 'var(--accent)' : 'rgba(245,240,232,0.12)'}`,
+                  padding: '8px 16px', borderRadius: '999px',
+                  fontFamily: 'var(--font-geist-mono), monospace',
+                  fontSize: '11px', letterSpacing: '0.14em', textTransform: 'uppercase',
+                  cursor: 'pointer', transition: 'all 0.2s',
                 }}
               >
                 {label}
@@ -272,65 +230,48 @@ export default function FullPageScroll({ slides, backgrounds, navLinks }: Props)
         </div>
       )}
 
-      {/* Footer */}
-      <div style={{
-        position: 'fixed',
-        bottom: isWide ? '50px' : '80px',
-        left: '24px',
-        right: '24px',
-        justifyContent: 'center',
-        zIndex: 100,
-        opacity: activeIndex > 0 && footerVisible && (isWide || activeIndex !== slides.length - 1) ? 1 : 0,
-        transition: footerVisible ? 'opacity 0.4s ease' : 'opacity 0.15s ease',
-        pointerEvents: 'none',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '16px',
-      }}>
-        <div style={{ width: '100px', height: '1px', background: 'white' }} />
-        <span style={{ color: 'white', fontSize: '0.8rem', letterSpacing: '0.15em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
-          {footerText}
-        </span>
-        <div style={{ width: '100px', height: '1px', background: 'white' }} />
-      </div>
-
       {/* By lean */}
       <div style={{
-        position: 'fixed',
-        bottom: isWide ? '28px' : '5px',
-        right: '5vw',
-        zIndex: 100,
-        opacity: activeIndex > 0 ? 1 : 0,
-        transition: 'opacity 0.4s ease',
-        pointerEvents: 'none',
-        color: 'rgba(255,255,255,0.5)',
-        fontSize: '0.72rem',
-        letterSpacing: '0.08em',
+        position: 'fixed', bottom: isWide ? '28px' : '5px', right: '5vw', zIndex: 100,
+        opacity: activeIndex > 0 ? 1 : 0, transition: 'opacity 0.4s ease',
+        pointerEvents: 'none', color: 'rgba(255,255,255,0.5)', fontSize: '0.72rem', letterSpacing: '0.08em',
       }}>
         by lean
       </div>
 
-      {/* Indicadores laterales */}
+      {/* Side dots — desktop only */}
       <div className="hidden md:flex" style={{
-        position: 'fixed',
-        right: '24px',
-        top: '50%',
-        transform: 'translateY(-50%)',
-        flexDirection: 'column',
-        gap: '8px',
-        alignItems: 'center',
-        zIndex: 100,
+        position: 'fixed', right: '28px', top: '50%', transform: 'translateY(-50%)',
+        flexDirection: 'column', gap: '10px', alignItems: 'flex-end', zIndex: 100,
       }}>
-        {slides.map((_, i) => (
-          <div key={i} style={{
-            width: '16px',
-            borderRadius: '4px',
-            background: 'white',
-            opacity: i === activeIndex ? 1 : 0.3,
-            height: i === activeIndex ? '48px' : '16px',
-            transition: 'height 0.3s ease, opacity 0.3s ease',
-          }} />
-        ))}
+        {slides.map((_, i) => {
+          const label = SLIDE_LABELS[i] ?? String(i + 1);
+          const active = i === activeIndex;
+          return (
+            <button
+              key={i}
+              onClick={() => navigateTo(i)}
+              className="side-dot-btn"
+              style={{
+                position: 'relative',
+                width: active ? '44px' : '28px', height: '8px', borderRadius: '999px',
+                border: `1px solid ${active ? 'var(--accent)' : 'rgba(245,240,232,0.18)'}`,
+                background: active ? 'var(--accent)' : 'transparent',
+                cursor: 'pointer', padding: 0, transition: 'all 0.3s',
+              }}
+            >
+              <span className="side-dot-label" style={{
+                position: 'absolute', right: '36px', top: '50%', transform: 'translateY(-50%)',
+                fontFamily: 'var(--font-geist-mono), monospace', fontSize: '10px',
+                letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--foreground)',
+                background: 'rgba(10,10,10,0.85)', padding: '4px 8px', borderRadius: '4px',
+                whiteSpace: 'nowrap', border: '1px solid rgba(245,240,232,0.12)',
+              }}>
+                {label}
+              </span>
+            </button>
+          );
+        })}
       </div>
     </div>
   );

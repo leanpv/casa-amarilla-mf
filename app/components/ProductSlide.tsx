@@ -30,7 +30,12 @@ const slideVariants = {
   exit: (dir: number) => ({ x: dir > 0 ? '-100%' : '100%' }),
 };
 
-export default function ProductSlide({ product, imageScale = 1 }: { product: Product; imageScale?: number }) {
+const RING_TEXT: Record<string, string> = {
+  'Empanadas': '◆ Repulgue a mano · Masa de hojaldre · Lote semanal · ◆ Repulgue a mano · Masa de hojaldre · Lote semanal · ',
+  'Alfajores': '◆ Chocolate templado · Receta de autor · Envuelto a mano · ◆ Chocolate templado · Receta de autor · Envuelto a mano · ',
+};
+
+export default function ProductSlide({ product, imageScale = 1, index = 1 }: { product: Product; imageScale?: number; index?: number }) {
   const [isMobile, setIsMobile] = useState(false);
   const [hIndex, setHIndex] = useState(0);
   const [direction, setDirection] = useState(1);
@@ -74,27 +79,13 @@ export default function ProductSlide({ product, imageScale = 1 }: { product: Pro
     setTimeout(() => { hAnimating.current = false; }, H_DURATION * 1000 + 50);
   };
 
-  const arrowStyle = (side: 'left' | 'right'): React.CSSProperties => ({
-    position: 'absolute',
-    [side]: isMobile ? '16px' : '27vw',
-    top: '50%',
-    transform: 'translateY(-50%)',
-    zIndex: 10,
-    background: 'rgba(255,255,255,0.15)',
-    border: '1px solid rgba(255,255,255,0.3)',
-    borderRadius: '50%',
-    width: '44px',
-    height: '44px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    cursor: 'pointer',
-    color: 'white',
-    fontSize: '18px',
-    transition: 'background 0.2s ease',
-  });
+  const slideLabels = [
+    product.variant?.name ?? product.category,
+    ...subProducts.map(s => s.name),
+  ];
 
   const rightPanel = rightPanels[rightIndex];
+  const ringText = RING_TEXT[product.category ?? ''] ?? '';
 
   return (
     <div style={{ height: '100%', position: 'relative', overflow: 'hidden' }}>
@@ -108,6 +99,26 @@ export default function ProductSlide({ product, imageScale = 1 }: { product: Pro
         ))}
       </div>
 
+      {/* Ring de texto giratorio — detrás de la imagen */}
+      {!isMobile && ringText && (
+        <div style={{
+          position: 'absolute', left: '50%', top: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: '54vmin', height: '54vmin',
+          animation: 'spin-ring 90s linear infinite',
+          pointerEvents: 'none', zIndex: 1, opacity: 0.5,
+        }}>
+          <svg viewBox="-200 -200 400 400" style={{ width: '100%', height: '100%', overflow: 'visible' }}>
+            <defs>
+              <path id={`ring-${product.name}`} d="M 0 0 m -170 0 a 170 170 0 1 1 340 0 a 170 170 0 1 1 -340 0" />
+            </defs>
+            <text fontFamily="var(--font-geist-mono), monospace" fontSize="14" letterSpacing="8" fill="white" stroke="white" strokeWidth="0.4">
+              <textPath href={`#ring-${product.name}`}>{ringText}</textPath>
+            </text>
+          </svg>
+        </div>
+      )}
+
       {/* Track de imágenes con dirección */}
       <AnimatePresence initial={false} custom={direction}>
         <motion.div
@@ -118,7 +129,7 @@ export default function ProductSlide({ product, imageScale = 1 }: { product: Pro
           animate="center"
           exit="exit"
           transition={{ duration: H_DURATION, ease: [0.4, 0, 0.2, 1] }}
-          style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2 }}
         >
           {isMobile ? (
             <div style={{ position: 'relative', width: `${Math.min(85, 85 * imageScale)}vw`, height: '45vh' }}>
@@ -135,16 +146,27 @@ export default function ProductSlide({ product, imageScale = 1 }: { product: Pro
       {/* Texto izquierdo — siempre visible */}
       <div style={{
         position: 'absolute',
-        zIndex: 2,
+        zIndex: 3,
         ...(isMobile
-          ? { top: '185px', left: 0, right: 0, textAlign: 'center', padding: '0 24px' }
-          : { left: '5vw', top: '50%', transform: 'translateY(-50%)', maxWidth: '22vw' }
+          ? { top: '170px', left: 0, right: 0, textAlign: 'center', padding: '0 28px' }
+          : { left: '5vw', top: '50%', transform: 'translateY(-50%)', maxWidth: '24vw', display: 'flex', flexDirection: 'column', gap: '20px' }
         ),
       }}>
-        <h2 style={{ fontSize: isMobile ? 'clamp(1.6rem, 7vw, 2.4rem)' : 'clamp(1.4rem, 2.2vw, 2.8rem)', fontWeight: 800, color: 'white', textTransform: 'uppercase', lineHeight: 1.1, margin: 0 }}>
+        {/* Title */}
+        <h2 style={{
+          fontSize: isMobile ? 'clamp(36px, 10vw, 56px)' : 'clamp(46px, 6vw, 96px)',
+          fontWeight: 800, color: 'white', textTransform: 'uppercase',
+          lineHeight: 0.88, letterSpacing: '-0.045em', margin: 0,
+        }}>
           {product.category}
         </h2>
-        <p style={{ color: 'rgba(255,255,255,0.75)', marginTop: isMobile ? '8px' : '14px', fontSize: isMobile ? 'clamp(0.8rem, 3.5vw, 1rem)' : 'clamp(0.8rem, 1vw, 1rem)', lineHeight: isMobile ? 1.6 : 1.75 }}>
+        {/* Description */}
+        <p style={{
+          color: 'rgba(245,240,232,0.7)',
+          marginTop: isMobile ? '10px' : '0',
+          fontSize: isMobile ? '14px' : '15px',
+          lineHeight: 1.55, maxWidth: isMobile ? undefined : '300px',
+        }}>
           {product.description}
         </p>
       </div>
@@ -153,47 +175,83 @@ export default function ProductSlide({ product, imageScale = 1 }: { product: Pro
       {rightPanel && (
         <div style={{
           position: 'absolute',
-          zIndex: 2,
+          zIndex: 3,
           opacity: rightVisible ? 1 : 0,
           transition: rightVisible ? 'opacity 0.3s ease' : 'opacity 0.15s ease',
           ...(isMobile
-            ? { bottom: '130px', left: 0, right: 0, textAlign: 'center', padding: '0 24px' }
-            : { right: '5vw', top: '50%', transform: 'translateY(-50%)', maxWidth: '22vw', textAlign: 'right' }
+            ? { bottom: '120px', left: 0, right: 0, textAlign: 'center', padding: '0 28px' }
+            : { right: '5vw', top: '50%', transform: 'translateY(-50%)', maxWidth: '24vw', textAlign: 'right', display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'flex-end' }
           ),
         }}>
-          <h2 style={{ fontSize: isMobile ? 'clamp(1.2rem, 5vw, 1.8rem)' : 'clamp(1.4rem, 2.2vw, 2.8rem)', fontWeight: 800, color: 'white', textTransform: 'uppercase', lineHeight: 1.1, margin: 0 }}>
+          {/* Gold eyebrow */}
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: '12px',
+            flexDirection: isMobile ? 'row-reverse' : 'row',
+            justifyContent: isMobile ? 'center' : 'flex-end',
+          }}>
+            <span style={{ fontFamily: 'var(--font-geist-mono), monospace', fontSize: '11px', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--accent)' }}>
+              Variedad
+            </span>
+            <div style={{ width: '28px', height: '1px', background: 'var(--accent)' }} />
+          </div>
+          {/* Variant name */}
+          <h2 style={{
+            fontSize: isMobile ? 'clamp(28px, 8vw, 44px)' : 'clamp(36px, 4.2vw, 64px)',
+            fontWeight: 800, color: 'white', textTransform: 'uppercase',
+            lineHeight: 0.95, letterSpacing: '-0.035em', margin: 0,
+          }}>
             {rightPanel.name}
           </h2>
-          <p style={{ color: 'rgba(255,255,255,0.75)', marginTop: isMobile ? '8px' : '14px', fontSize: isMobile ? 'clamp(0.75rem, 3.2vw, 0.95rem)' : 'clamp(0.8rem, 1vw, 1rem)', lineHeight: isMobile ? 1.6 : 1.75 }}>
+          {/* Variant description */}
+          <p style={{
+            color: 'rgba(245,240,232,0.75)',
+            marginTop: isMobile ? '8px' : '0',
+            fontSize: isMobile ? '13px' : '14px',
+            lineHeight: 1.55, maxWidth: isMobile ? undefined : '280px',
+          }}>
             {rightPanel.description}
           </p>
+          {/* Price */}
+          {!isMobile && (
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px', fontFamily: 'var(--font-geist-mono), monospace', fontSize: '11px', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(245,240,232,0.6)' }}>
+              <span>Desde</span>
+              <b style={{ fontFamily: 'var(--font-geist-sans), sans-serif', color: 'white', fontWeight: 700, fontSize: '22px', letterSpacing: '-0.01em' }}>${product.price}</b>
+              <span>/ unidad</span>
+            </div>
+          )}
         </div>
       )}
 
-      {/* Flechas */}
+      {/* Sub-carousel */}
       {totalSlides > 1 && (
-        <>
-          <button
-            onClick={() => navigate(-1)}
-            style={arrowStyle('left')}
-            onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.28)')}
-            onMouseLeave={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.15)')}
-          >‹</button>
-          <button
-            onClick={() => navigate(1)}
-            style={arrowStyle('right')}
-            onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.28)')}
-            onMouseLeave={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.15)')}
-          >›</button>
-        </>
-      )}
-
-      {/* Dots */}
-      {totalSlides > 1 && (
-        <div style={{ position: 'absolute', bottom: '36px', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: '8px', pointerEvents: 'none', zIndex: 2 }}>
-          {Array.from({ length: totalSlides }).map((_, i) => (
-            <div key={i} style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'white', opacity: i === hIndex ? 1 : 0.35, transition: 'opacity 0.3s ease' }} />
+        <div style={{
+          position: 'absolute',
+          bottom: isMobile ? '24px' : '36px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '14px',
+          zIndex: 5,
+          background: 'rgba(10,10,10,0.55)',
+          border: '1px solid rgba(245,240,232,0.12)',
+          padding: '10px 14px',
+          borderRadius: '999px',
+          backdropFilter: 'blur(8px)',
+          WebkitBackdropFilter: 'blur(8px)',
+        }}>
+          <button className="sub-arrow" onClick={() => navigate(-1)}>‹</button>
+          {slideLabels.map((label, i) => (
+            <button
+              key={i}
+              className={`sub-chip${i === hIndex ? ' active' : ''}`}
+              onClick={() => { if (i !== hIndex) navigate(i > hIndex ? 1 : -1); }}
+            >
+              <span className="sub-dot" />
+              {label}
+            </button>
           ))}
+          <button className="sub-arrow" onClick={() => navigate(1)}>›</button>
         </div>
       )}
 
